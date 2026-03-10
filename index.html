@@ -574,8 +574,7 @@
 
       <div class="contact-form">
         <h3>Send Us a Message</h3>
-        <iframe name="hidden_iframe" style="display:none"></iframe>
-        <form id="leadForm" method="POST" target="hidden_iframe">
+        <form id="leadForm">
           <div class="form-row">
             <div class="form-group">
               <label for="name">Your Name *</label>
@@ -623,29 +622,38 @@
 
   var form      = document.getElementById("leadForm");
   var submitBtn = document.getElementById("submitBtn");
-  var iframe    = document.querySelector("iframe[name='hidden_iframe']");
-  var submitted = false;
-
-  // Set form action to the web app URL
-  form.setAttribute("action", WEBAPP_URL);
 
   form.addEventListener("submit", function(e) {
+    e.preventDefault();
     if (!form.checkValidity()) return;
+
     submitBtn.textContent = "Sending...";
     submitBtn.disabled    = true;
-    submitted = true;
-  });
 
-  // When the iframe loads after form submission, show success
-  iframe.addEventListener("load", function() {
-    if (!submitted) return;
-    document.querySelector(".contact-form").innerHTML =
-      '<div class="form-success">' +
-        '<div class="check">✅</div>' +
-        '<h4>Got it — we\'ll be in touch soon!</h4>' +
-        '<p>Expect a call or email from us within 2 hours.<br>' +
-        'Urgent? Call <a href="tel:9196079670">919-607-9670</a> directly.</p>' +
-      '</div>';
+    // URLSearchParams sends application/x-www-form-urlencoded — a CORS simple request
+    // that reaches doPost() without needing a preflight or iframe workaround.
+    var params = new URLSearchParams(new FormData(form)).toString();
+
+    fetch(WEBAPP_URL, {
+      method:  "POST",
+      mode:    "no-cors",   // opaque response is fine — we just need the data to arrive
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body:    params
+    })
+    .then(function() {
+      document.querySelector(".contact-form").innerHTML =
+        '<div class="form-success">' +
+          '<div class="check">✅</div>' +
+          '<h4>Got it — we\'ll be in touch soon!</h4>' +
+          '<p>Expect a call or email from us within 2 hours.<br>' +
+          'Urgent? Call <a href="tel:9196079670">919-607-9670</a> directly.</p>' +
+        '</div>';
+    })
+    .catch(function() {
+      submitBtn.textContent = "Send My Request ➜";
+      submitBtn.disabled    = false;
+      alert("Something went wrong. Please try again or call us at 919-607-9670.");
+    });
   });
 </script>
 
