@@ -618,7 +618,7 @@
 </footer>
 
 <script>
-  var WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzRrmzBXbU40S-yIMyjdsUy6W8KrUXC6C2eYJxZe5sF9zMb0eDNvITEOut-4cTNERC7/exec";
+  var WEBAPP_URL = "https://script.google.com/macros/s/AKfycbyvuQO5osRoqOiNsFY38FfPNMXfiZqyLUIpSMKKXIEbVWLQXkQyRmb2spwO41HITizd/exec";
 
   var form      = document.getElementById("leadForm");
   var submitBtn = document.getElementById("submitBtn");
@@ -630,15 +630,13 @@
     submitBtn.textContent = "Sending...";
     submitBtn.disabled    = true;
 
-    // URLSearchParams sends application/x-www-form-urlencoded — a CORS simple request
-    // that reaches doPost() without needing a preflight or iframe workaround.
-    var params = new URLSearchParams(new FormData(form)).toString();
-
+    // Sending URLSearchParams as body lets the browser auto-set
+    // Content-Type: application/x-www-form-urlencoded — a CORS simple
+    // request that reaches doPost() with no preflight needed.
     fetch(WEBAPP_URL, {
-      method:  "POST",
-      mode:    "no-cors",   // opaque response is fine — we just need the data to arrive
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body:    params
+      method: "POST",
+      mode:   "no-cors",
+      body:   new URLSearchParams(new FormData(form))
     })
     .then(function() {
       document.querySelector(".contact-form").innerHTML =
